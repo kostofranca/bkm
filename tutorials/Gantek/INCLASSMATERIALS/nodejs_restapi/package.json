@@ -1,0 +1,14 @@
+{
+  "name": "gantek_rest_api",
+  "version": "1.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Gantek Akademi",
+  "license": "GPL v2",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

@@ -1,0 +1,13 @@
+[Unit]
+Description=Python Django for Project Mercury
+Documentation=http://wiki.caleston-dev.ca/mercury
+After=postgresql.service
+
+[Service]
+ExecStart= /bin/bash /usr/bin/project-mercury.sh
+User=project_mercury
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy graphical.target
