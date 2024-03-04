@@ -3,7 +3,7 @@
 ---
 
 1. Essential Commands (%25)
-  1. Logging System and Working with Files and Directories
+  * Logging System and Working with Files and Directories
       * ``man man``
       * ``apropos -s <comma-seper.-list-of-sections> <some-text>`` command searches for matching texts in the man pages. First time we try to use ``apropos``, we need to create the database with this ``sudo mandb``
       * ``cd -`` go to the previous directory
@@ -121,6 +121,7 @@
         * ``cat /proc/version`` -> Prints the kernel version in linux
         * ``help`` -> to see the bash default commands
         * ``cat /etc/cron.hourlv/0anacron`` -> Cheatsheet for bash scripts!!!!!!!
+   3. Managing Critical Resources of Processes
       * Manage the Startup Processes
         * Service Unit Files
         * ``systemctl cat <service_name>`` -> Print the content of service unit file to the screen
@@ -143,19 +144,131 @@
         * ``ps u -U <user_name>``
         * ``ps -a <process_name>`` -> list all the prcesses that name containing <process_name>
         * ``nice -n <-20 - 20> <program_name>`` -> nice value attachment for processes
-        * ``ps lax`` -> all processes not just the user we are running as
+        * ``sudo renice 9 <PID>`` -> reassign a nice value to a process
+        * ``ps lax`` -> all processes not just the user we are running as with their nice value
         * ``ps fax`` ->  process tree
-        * 
-   3. Managing Critical Resources of Processes
+        * ``pgrep -a bash`` -> All the processes containing name bash with their PIDs
+        * ``lsof -p bash`` -> All the files opened by the process
+      * Locate and Analyse System Log Files
+        * ``/var/log`` directory contains the system logs
+        * ``journalctl -p`` -> priority tags list
+        * ``journalctl -S <since_date> -U <until_date>`` -> Look for logs in a given time interval
+        * ``last`` -> who logged in lastly
+        * ``journalctl --unit=sshd.service -n 20 --no-pager`` -> sshd deamon logs
+      * Schedule Tasks
+        * CRON
+          * ``cat /etc/crontab``
+          * ``crontab -l`` -> List the entries in the crontable
+          * ``crontab -e -u <user>`` -> crontab entries for <user>
+          * ``crontab -r`` -> remove entries from crontable of the logged in user
+          * ``crontab -r -u <user>`` -> remove entries for a user from crontable
+          * Another way to set a cronjob is to add the script in the following directories accordingly
+            * ``/etc/cron.hourly``
+            * ``/etc/cron.daily``
+            * ``/etc/cron.weekly``
+            * ``/etc/cron.monthly``
+        * ANACRON
+          * ``vi /etc/anacrontab`` -> Anacron table for scheduled tasks
+          * ``anacron -T`` -> to check if syntax for anacron table is correct
+          * ``anacron -n`` -> run all the jobs --now
+          * ``at 'now + 1 minutes'`` -> Schedule a command/script to be run in 1 minute
+          * ``atq`` -> list scheduled jobs
+          * ``atrm <job_id>`` -> remove a job
+      * Manage Software Using Package Manager
+        * ``dpkg --listfiles nginx`` -> Files downloaded with the software
+        * ``dpkg --search /usr/sbin/nginx`` -> wich package the file belongs to
+        * ``apt show <package_name>`` -> What use the dependency have for main software
+        * ``apt serach --names-only <package_name>`` -> Search for the packages that only names matches not their description
+        * ``apt autoremove <package_name>`` -> Remove a package along with its dependencies
+      * Repository Configuration for a Package Manager
+        * ``/etc/apt/sources.list`` -> Repolist for Ubuntu
+        * To install a third party software,
+          * ``curl <key_address> -o <key_name>.key`` -> Download the gpg key,
+          * ``gpg --dearmor <key_name>.key`` -> text format to binary format so that our package manager can understand
+          * ``mv <key_name>.key.gpg /etc/apt/keyrings`` -> This directory keeps third party public keys
+          * ``vi /etc/apt/source.list.d/<package_name>.list`` -> Create repo for docker
+          * ``echo "deb [signed-by=/etc/apt/keyrings/<key_name>.key.gpg]" <package_address> jammy stable > /etc/apt/source.list.d/<package_name>.list``
+          * ``apt update`` -> Update the repositories that we see
+          * ``add-apt-repository ppa:user/appplication`` -> Add Personal Package Archive
+          * ``add-apt-repository --list`` -> List all repos included ppa
+          * ``add-apt-repository --remove <repo_name>`` -> Remove the PPA repo from the list
+      * Install a Software by Compiling the Source Code
+      * Verify the Integrity and Availibility of Resources
+        * ``df -h``
+        * ``du -sh`` -> How much disk space files cover
+        * ``free -h`` -> RAM Usage
+        * ``free --mega`` -> Total memory
+        * ``uptime`` -> CPU Usage
+          * ``17:24:55 up 32 min, 1 user, load average: 0.05, 0.05, 0.01``
+          * First number is the load average in the last minute, second in the last 5 minute, last in the 15 minute
+        * ``lscpu`` -> Some specifik CPU info
+        * ``lspci`` -> Detail on hardware
+        * ``systemctl list-dependencies`` -> Dependencies of a service
+      * Kernel Runtime Paramaters
+        * ``sysctl -a`` -> List kernel runtime parameters
+        * ``sysctl -w <kernel_config>=1`` -> disable some kernel parameter
+        * ``sysctl -p`` -> makes the values persistent in the ``/etc/sysctl.conf`` file
+      * SElinux !!!!!!!! Important Topic, Did not understand
+        * ``ls -Z`` -> SELinux Context Label list
+          * ``unconfined_u:object_r:user_home_t:s0`` -> user:role:type:level
+        * ``chcon -t <syscontext> <file_path>`` -> Change the selinux context of a file
+        * ``getenforce`` -> Get the current SELinux mode
+        * ``setenforce 0`` -> Temporarily change the SELinux status to "permissive" on the system
+        * ``semanage user -l`` -> SELinux User Table
+      * 
 3. User and Group Management (%10)
-   1. Creating and Managing User Accounts
-   2. Set Resource Quotas
-   3. Configuring Advance Authentication Options
+  1. Creating and Managing User Accounts
+    * ``useradd john`` -> Create user
+    * All the directories from ``/etc/skel`` will be coppied to the new users home dir
+    * ``useradd --defaults`` -> Default settings for creation of new users
+    * ``userdel <user_name>`` -> Delete user, This may delete the group also. But home directory will remain
+    * ``userdel -remove <user_name>`` -> will delete the home directory as well
+    * ``useradd --shell /bin/othershell --home-dir /home/otherdirectory/ john`` or ``useradd -s /bin/othershell -d /home/directory john`` -> add user with custom shell and home directory
+    * ``useradd -u <custom_ID> <user_name>`` -> add user with custom id number
+    * ``useradd --system <user_name>`` -> add a system user account, their id's are smaller than 1000
+    * ``usermod -d /home/otherdirectory -m <user_name>`` -> Move <user_name>'s home directory
+    * ``usermod --login <new_user_name> <old_user_name>`` or ``usermod -l <new_user_name> <old_user_name>``-> Change user name for current user
+    * ``usermod -s /bin/othershell <user_name>``-> Change the shell for user
+    * ``usermod -L <user_name>`` -> Lock user account (User files does not deleted)
+    * ``usermod -U <user_name>`` -> Unlock user account
+    * ``usermod -e "<YYYY-MM-DD>" <user_name>`` -> Set an expire data for user account. User will not be able to log in to his account. It can be reenabled. To enable the account use the below command
+    * ``usermod -e "" <user_name>``
+    * ``chage --lastday <day> <user_name>`` or ``chage -d <day> <user_name>`` -> Expiration for password. Unexpire a password with below command
+    * ``chage -d -1 <user_name>``
+    * ``chage -M <day> <user>`` -> Set a password change period as a day for user
+    * ``chage -l <user_name>`` -> to see when the user passsword expires
+    * ``groupdel <group_name>`` -> Delete the group
+    * ``gpasswd --a <user_name> <group_name>`` -> add user to a secondary group
+    * ``groups <user_name>`` -> see the groups that user belongs to
+    * ``gpasswd -d <user_name> <group_name>`` delete user's secondary group
+    * ``usermod --gid <group_name> <user_name>`` -> Change the user's primary group.
+    * ``groupmod -n <new_group_name> <old_group_name>`` -> change the group name
+  2. Manage Environment Variables
+    * ``env`` or ``printenv`` -> Prints the environment variables
+    * ``/etc/profile.d`` -> This are the scripts that run in the startup of the shell
+  3. Set Resource Quotas
+    * ``/etc/security/limits.conf`` -> User limits
+    * ``ulimit -a`` -> List user limits
+  4. Configuring Advance Authentication Options
+    * ``/etc/sudoers`` has this syntax ``user/%group host=(run_as_user) -NOPASSWD:ALL-command_list``
+    * ``visudo`` -> MAke changes to suders file in a safe mode
 4. Networking(12%)
-   1. Network
-   2. Services
-   3. Routing
-   4. Packet Filtering
+  1. Network
+    * ``xxx.xxx.xxx.xxx/24`` -> This is called CIDR notation. This means that first 24 bits of this address are the prefix of this network.
+    * ``ip a`` -> List all the network interfaces
+    * ``ip -c add`` -> list everything in colors
+    * ``ip link set dev <interface> up`` -> If you have a network interface down, use this command to get it up. Making up does not give IP.
+    * ``ip address add <ip_address_CIDR> dev <interface>`` -> Give ip address to an interface that is up.
+    * ``ip address delete <ip_address_CIDR> dev <interface>`` -> Delete an ip address
+    * ``ip`` command makes temprary changes. Ass soon as the system is rebooted, the changes are gone.
+    * ``netplan try`` -> This command applies the changes in the ``/etc/netplan/*`` files. This also just checks and apply the changes since we are trying to configure the network and this has some serious effects.
+    * ``netplan get`` -> list all the configurations for all the interfaces
+    * ``resolvectl status`` -> Status of network interfaces and global configurations
+    * ``/etc/systemd/resolved.conf`` -> The global congiurations for DNS
+    * ``resolvectl dns`` -> Shorter output for DNS
+  2. Services
+  3. Routing
+  4. Packet Filtering
 5. Service Configuration (%20)
    1. Linux Cost Necessary Services
    2. DNS
@@ -163,8 +276,10 @@
    4. Mail Server
 6. Storage Management (%13)
    1. Logical Volume Management
-   2. Advanced File System PermissionLFCS
+   2. Advanced File System Permission
 
+NOTES
 
+* ``/usr/share/doc`` -> Contains example files for some applications
 
 | Consider RHCSA Eam
