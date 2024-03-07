@@ -1,9 +1,12 @@
 # Linux Foundation Certified System Administrator
+
 11.12.2023
+
 ---
 
 1. Essential Commands (%25)
-  * Logging System and Working with Files and Directories
+
+    * Logging System and Working with Files and Directories
       * ``man man``
       * ``apropos -s <comma-seper.-list-of-sections> <some-text>`` command searches for matching texts in the man pages. First time we try to use ``apropos``, we need to create the database with this ``sudo mandb``
       * ``cd -`` go to the previous directory
@@ -58,7 +61,7 @@
           * ``egrep -r '/dev/[a-z]*[0-9]?' /etc/`` -> Match either of the one in the set
           * ``egrep -r '([a-z][A-Z]*[0-9]?)*'`` -> Subexpressions
           * ``[^]``
-      * Archive, Bacup Operations
+      * Archive, Backup Operations
         * Archive
           * ``tar`` -> Tape archive
           * Packing Files and Directories with TAR
@@ -77,22 +80,25 @@
           * ``tar cjf archive.tar.bzip2 file2`` -> Archive and compress the file at the same time with ``tar`` command (bzip)
           * ``tar cJf archive.tar.xz file3`` -> Archive and compress the file at the same time with ``tar`` command (xz)
       * Send to  a Remote Location
-       * ``rsync -a Pictures/ aaron@1.1.1.1:/home/aaron/Pictures`` -> Sync with a remote server
-    * I/O Redirection
-      * Redirect Output
-        * ``cat some_file.txt > redirect_file.txt``
-      * stdin, stdout, stderr
-        * ``>`` -> stdout
-        * ``<`` -> stdin
-        * ``2>/dev/null`` -> stderr
-        * ``grep -r '^The' /etc/ 2>&1 1>all_output.txt`` -> ???????
-      * Heredoc HereString
-        * ``sort << EOF`` -> ?????????
-    * SSL Certificates
-      * Secure Socket Layer -> SSL
-    * Git Operations
-      * ``git reset file_name`` -> Unstage a file
+        * ``rsync -a Pictures/ aaron@1.1.1.1:/home/aaron/Pictures`` -> Sync with a remote server
+
+   * I/O Redirection
+     * Redirect Output
+       * ``cat some_file.txt > redirect_file.txt``
+       * stdin, stdout, stderr
+         * ``>`` -> stdout
+         * ``<`` -> stdin
+         * ``2>/dev/null`` -> stderr
+         * ``grep -r '^The' /etc/ 2>&1 1>all_output.txt`` -> ???????
+       * Heredoc HereString
+         * ``sort << EOF`` -> ?????????
+     * SSL Certificates
+       * Secure Socket Layer -> SSL
+     * Git Operations
+       * ``git reset file_name`` -> Unstage a file
+
 2. Operations Deployment (%20)
+
    1. System Boot Processes
       * Boot, Reboot and Shutdown A System Safely
         * ``systemctl reboot``
@@ -116,7 +122,7 @@
    2. Task Automation
       * Use Scripting to Automate System Tasks
         * When we log in, "Bash" program opens up ( a command interpreter )
-        *  ``#!/bin/bash`` -> To run the scripts in the file, ad this line as the first line in the file.
+        * ``#!/bin/bash`` -> To run the scripts in the file, ad this line as the first line in the file.
         * ``#`` -> Comment line in the bash script
         * ``cat /proc/version`` -> Prints the kernel version in linux
         * ``help`` -> to see the bash default commands
@@ -215,7 +221,7 @@
         * ``getenforce`` -> Get the current SELinux mode
         * ``setenforce 0`` -> Temporarily change the SELinux status to "permissive" on the system
         * ``semanage user -l`` -> SELinux User Table
-      * 
+  
 3. User and Group Management (%10)
   1. Creating and Managing User Accounts
     * ``useradd john`` -> Create user
@@ -267,8 +273,43 @@
     * ``/etc/systemd/resolved.conf`` -> The global congiurations for DNS
     * ``resolvectl dns`` -> Shorter output for DNS
   2. Services
+    * ``ss -tulpn`` -> Services waiting for incoming network connections
+      * ``-l`` for listening
+      * ``-t`` for TCP connections
+      * ``-u`` for UDP connections
+      * ``-n`` for numeric values like port number
+      * ``-p`` for processes, because of this tag we need root privileges
+    * Bond and Bridging
+      * ``/usr/share/doc/netplan`` -> Contains example files
+      * ``ip link set dev <bond_name> down`` -> undervision bond
+      * ``ip address add <ip_address_CIDR> dev <bond_name>`` -> Give ip address to an bond.
   3. Routing
   4. Packet Filtering
+    * ``ufw`` is an abbreviation for Uncomplicated Firewall
+    * ``ufw status verbose`` -> Status of ufw
+    * ``ufw enable`` -> Enable the firewall
+    * ``ufw allow 22/tcp`` -> allow tcp connection on 22
+    * ``ufw allow from <SENDER_IP> to any port <port_number>`` -> from <SENDER_IP> allow to "any" IP addresses' on port 22
+    * ``ufw status numbered`` -> We see the rules listed with numbers
+    * ``ufw delete <RULE_NUMBER>`` -> delete the rules with their index number
+    * ``ufw insert 3 deny <IP>`` -> Insert deny rule to a number 3 in the ufw table
+    * ``ufw deny out on <interface> to <target_ip>`` -> Deny all outgoing traffic to a ip address from an interface
+    * ``ufw allow in on <interface> from <source_ip> to <dest_ip> port <port_number> proto <protocol(tcp/udp)>``
+  5. Port Forwarding
+    * ``/etc/sysctl.d/99-sysctl.conf`` -> Change the port forwarding options from here.
+    * ``sysctl --system`` -> Make available the above changes to the system.
+  6. Create a Reverse Proxy
+    * ``apt install nginx`` -> Install nginx
+    * ``vi /etc/nginx/sites-available/proxy.conf`` -> Load Balancing options are configured here
+    * ``vi /etc/nginx/proxy_params`` -> are the proxy configuration files.
+    * ``ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/proxy.conf`` -> Enable the configurations
+    * ``rm /etc/nginx/sites-enabled/default`` -> To disable the configurations
+    * ``nginx -t`` -> check the config files for errors
+    * ```ln -s /etc/nginx/sites-available/lb.conf /etc/nginx/sites-enabled/lb.conf`` -> Load Balancing options are configured here, too.
+    * ``systemctl restart nginx``
+  7. Syncronize Time Using Time Servers
+    * ``timedatectl list-timezones``
+    * ``timedatectl set-timezone``
 5. Service Configuration (%20)
    1. Linux Cost Necessary Services
    2. DNS
